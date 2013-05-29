@@ -1,0 +1,13 @@
+node_modules
+*.swp
+*.swo
+.env
+keys
+build-btproof.sh
+btproof.com
+views/order.jade
+views/terms.jade
+views/thankyou.jade
+.git-old
+build
+script/order.coffee

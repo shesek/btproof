@@ -1,0 +1,131 @@
+extend layout
+
+append title
+  | Bitcoin Trusted Timestamping
+
+append scripts
+  script(src='timestamp.js')
+
+block content
+  header.subhead
+    h1 BTProof
+    p.lead Trusted timestamping on the Bitcoin blockchain
+  .row-fluid
+    .span7
+      dl
+        dt#what What is trusted timestamping?
+        dd
+          :markdown
+            Trusted timestamping allows to prove you held a document, some information or a file at some specific point in time,
+            in a way that can't be forged. [Read more at Wikipedia](http://en.wikipedia.org/wiki/Trusted_timestamping).
+        dt#uses What is it good for?
+        dd
+          :markdown
+            - Before signing an NDA, you can keep a trusted proof of the knowledge you had in that field prior
+              to to signing it.
+            - You can prove you developed a specific revesion of your software in a specific point in time by
+              timestamping the hash of your revision tree. With Git, its as simple as timestamping the
+              current commit SHA1.
+            - Before sharing your ideas with third parties, you can timestamp the information you're about to share
+              with them, as well as the fact that you're sharing it with them, to help resolve possible disputes.
+            - Contracts can be timestamped (along with digital signatures of both parties) to prove when they were
+              signed.
+            - Musicians and other digital art producers can prove when they created their work.
+        dt#how How does timestamping on the Bitcoin network work?
+        dd
+          :markdown
+            Its possible to [hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function) the data you wish to timestamp
+            and [turn it into a Bitcoin address](technical.html). By making a small payment (a satoshi, or 0.00000001 BTC) to it, the
+            payment is stored on the blockchain along with the address you paid to.
+
+            Since only the hash is stored on the Bitcoin blockchain, no one can tell what data you stored, but given the
+            pre-hashed data you can prove the data was created prior to the [block](https://en.bitcoin.it/wiki/Blocks) that
+            contains the payment made to that address.
+
+            **Update:** Bitcoin-qt 0.8.2 doesn't route transactions with small outputs by default. A lot of miners still accepts
+            those transactions, so it'll work fine in the short-term (and once the transactions is accepted into a block, it'll be part
+            the Bitcoin network forever). This method will be replaced in the future, when it becomes difficult to send those transactions.
+        dt#why What are the advantages of using the Bitcoin network?
+        dd
+          :markdown
+            - **You're not dependent on any single authority.** Traditionally, trusted timestamps are issued by trusted third parties
+              called TSAs (Time Stamping Authority), which are prone to data corruption and tampering. On the Bitcoin blockchain,
+              your timestamp is safely stored all over the world, and is *much* harder to tamper with.
+            - **Its anonymous.** No one knows who you are, what data you're timestamping, or even the fact that you're
+              timestamping anything.
+            - **Its really cheap.** At the current rates (~$110), including the transaction fees, it costs around 5 cents.
+              You can make a transaction without fees, lowering the cost to $0.00000116, a fraction of a cent.
+              However, it is highly recommended to pay the fees to support the miners who verify your timestamp with
+              their computing resources. In addition to that, making such a tiny transaction without fees might take long
+              to get into the blockchain, if ever.
+            - **Its really simple.** You can create trusted timestamps using any Bitcoin client, and its easy to automate the process
+              using bitcoin's [JSON-RPC API](https://en.bitcoin.it/wiki/API_reference_%28JSON-RPC%29).
+        dt#legal Will it hold in court?
+        dd
+          :markdown
+            **IANAL, TINLA**. That being said, I believe it will. From a technical point of view, its
+            [nearly](https://en.bitcoin.it/wiki/Weaknesses#Attacker_has_a_lot_of_computing_power) impossible
+            (much more so than with TSAs) to fake a timestamp created like that. You will probably need to bring a
+            technical expert to testify to that.
+        dt#destroy-coins Doesn't it destroy the Bitcoins used to pay to that address?
+        dd
+          :markdown
+            Yes. The coins are sent to an address that they can never be redeemed from, effectively taking them
+            out of circulation.
+            However, because its only a fraction of a bitcoin, the effect is minimal. To put this in perspective,
+            creating one **b**illion timestamps is equal to 10 BTC being lost due to someone losing his private keys
+            (which is quite common and happens on much larger scale). 
+          //You could technically create a *private* key
+            using the hashed data, make a payment to it, and than transfer the money back - but the transaction might be deleted
+            once its no longer needed. I believe its safer to "lock" 1 satoshi at that address, to ensure the network will keep
+            track of that forever.
+    .timestamp.span5
+      fieldset
+        legend Create a trusted timestamp
+        noscript: .alert.alert-error The hashing process requires JavaScript. Please use a JavaScript-enabled browser.
+        ul.nav.nav-tabs
+          li.active: a(href='#text', data-toggle='tab') From Text
+          li: a(href='#file', data-toggle='tab') Upload File
+          li: a(href='#hash', data-toggle='tab') Already have an hash?
+        div.tab-content
+          .tab-pane.active#text
+            p Enter the text you wish to timestamp:
+            textarea
+          .tab-pane#file
+            p Select a file to timestamp:
+            input(type='file')
+          .tab-pane#hash
+            p Enter your hash:
+            input(type='text')
+        .muted.
+          The data (both from text and from a file) is hashed locally in your browser, and is never uploaded to the server. Still, if you're timestamping
+          sensitive information, you're advised to hash it locally (howto:
+          <a data-toggle="tooltip" title="TLDR: sha256sum file" href="http://linux.die.net/man/1/sha256sum">Linux</a>,
+          <a data-toggle="tooltip" title="Download md5deep" href="http://md5deep.sourceforge.net/">Windows</a>, 
+          <a data-toggle="tooltip" title="TLDR: shasum -a 256 file" href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/Manpages/man1/shasum.1.html">Mac</a>)
+          and only input the hash using the "Already have an hash?" tab.
+        .btns
+          button#pay.btn.btn-primary(data-toggle='tooltip', data-placement='bottom', title='Make a payment to the generated address with your Bitcoin client') Create Timestamp 
+          = ' '
+          button#no-bitcoins.btn(data-toggle='tooltip', data-placement='bottom', title='We offer a service where we do the Bitcoin transaction for you. Click for more information.', data-url=order_server+'order.html') No Bitcoins?
+          = ' '
+          button#check-timestamp.btn(data-toggle='tooltip', data-placement='bottom', title='Check if the given data already exists on the blockchain, and since when.') Check timestamp
+        #result Address: <span class="address"></span>
+      .error.alert.alert-error
+      :markdown
+        #### Please read this carefully:
+        - **You must keep an exact copy of the pre-hashed data.** If you cannot provide the original
+          data that hashes to the address, you cannot prove anything using the hash alone.
+        - **Ensure the data you're hashing includes information about who you are.** If you're timestamping
+          a file hash, you can timestamp a message like *"I, John Due, from ..., born ...,
+          with the goverment issued ID ..., have a copy of the file that hashes to ..."*. In this case, you
+          must keep both the file and the exact wording you used for the message. Alternatively, you can
+          create a zip that contains the file(s) and a text file identifying you, and keep a copy of that zip.
+        - **The timestamp is accurate to a few hours precision.** You can prove the data existed prior to the
+          block which includes your payment. Blocks are created roughly every 10 minutes, but it might take a few until
+          your payment is included.
+        - Checking the timestamp is done using the [blockchain.info api](http://blockchain.info/q).
+          If you require highly reliable result, you're advised to **verify the timestamp** with the Bitcoin network.
+        - To **reproduce the address yourself** (important in case this website is unavailable),
+          see the [technical explaination](technical.html). Its really simple - 3 lines of pseudocode.
+

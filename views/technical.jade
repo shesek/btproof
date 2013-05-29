@@ -1,0 +1,36 @@
+extend layout
+
+append title
+  | Technical explaination 
+
+block content
+  :markdown
+    ### How is the data convereted to a Bitcoin address?
+
+    Basically, its the same process as described
+    [here](https://en.bitcoin.it/wiki/Technical_background_of_Bitcoin_addresses#How_to_create_Bitcoin_Address),
+    except that the data is hashed using sha256 and used instead of the public key. The exact steps are:
+
+    1. When timestamping a message or a file, the data is hashed using sha256. When you supply an hash, its
+       simply used as-is.
+    2. The hash is hashed again using ripemd160<span class="muted">\*</span>.
+    3. The version byte (0x00 for main net) is added to the beginning.
+    4. The checksum, which is the first 4 bytes of sha256(sha256(versioned\_hash)))<span class="muted">\*</span>, is added
+       to the end.
+    5. Finally, everything is converted to
+       [base58](https://en.bitcoin.it/wiki/Base58Check_encoding#Creating_a_Base58Check_string).
+
+    <p class="muted">**\*** Note that when hashing is applied on hashes, the actual hash is being hashed, and not the hexadecimal
+    representation of the hash.</p>
+
+    Or if you're more comfortable with pseudocode:
+
+    ```
+      hash = SHA256(DATA) // or the supplied hash 
+      vhash = CONCAT(VERSION_BYTE, RIPEMD160(hash)) // VERSION_BYTE is 0x00 for main net
+      address = BASE58(CONCAT(vhash, SHA256(SHA256(vhash))[0..3]))
+    ```
+
+    You can also download the [source from GitHub](https://github.com/shesek/btproof/) and run it
+    locally, for offline use or in case this website becomes unavailable.
+ 
