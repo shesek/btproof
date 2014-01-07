@@ -35,7 +35,7 @@ get_address = do (
 
 first_seen = (address, cb) ->
   ($.get "https://blockchain.info/q/addressfirstseen/#{address}").always (resp, status) ->
-    cb status is 'success' and new Date resp*1000
+    cb (new Date resp*1000 if status is 'success' and resp>0)
 
 display_error = (message) ->
   if message then $('.timestamp .error').text(message).show()
