@@ -11,7 +11,7 @@ block content
     [here](https://en.bitcoin.it/wiki/Technical_background_of_Bitcoin_addresses#How_to_create_Bitcoin_Address),
     except that the data is hashed using sha256 and used instead of the public key. The exact steps are:
 
-    1. When timestamping a message or a file, the data is hashed using sha256. When you supply an hash, its
+    1. When timestamping a message or a file, the data is hashed using sha256. When you supply a hash, its
        simply used as-is.
     2. The hash is hashed again using ripemd160<span class="muted">\*</span>.
     3. The version byte (0x00 for main net) is added to the beginning.
